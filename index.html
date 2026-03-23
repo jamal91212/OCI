@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wealth Management Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            900: '#0f172a',
+                            800: '#1e293b',
+                            700: '#334155',
+                        },
+                        emerald: {
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        
+        .loader {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-bottom-color: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Custom scrollbar for table container */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex font-sans antialiased overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 glass-card border-r border-slate-700/50 flex-shrink-0 flex flex-col hidden md:flex z-10 transition-all duration-300">
+        <div class="h-16 flex items-center px-6 border-b border-slate-700/50">
+            <i data-lucide="trending-up" class="text-emerald-500 mr-3 h-6 w-6"></i>
+            <span class="text-lg font-bold tracking-wide">Wealth<span class="text-emerald-500">Dash</span></span>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto py-6 flex flex-col gap-2 px-3">
+            <a href="#" class="flex items-center px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-all group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 text-slate-400 group-hover:text-emerald-400 transition-colors"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            
+            <a href="#" class="flex items-center px-3 py-2.5 rounded-lg bg-emerald-500/10 text-emerald-400 transition-all border border-emerald-500/20 group cursor-default shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                <i data-lucide="search" class="w-5 h-5 mr-3 text-emerald-500"></i>
+                <span class="font-medium">SEC Lookup</span>
+            </a>
+            
+            <a href="#" class="flex items-center px-3 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-all group opacity-50 cursor-not-allowed" title="Feature disabled">
+                <i data-lucide="file-text" class="w-5 h-5 mr-3 text-slate-400"></i>
+                <span class="font-medium">Document Analysis</span>
+                <i data-lucide="lock" class="w-3.5 h-3.5 ml-auto text-slate-500"></i>
+            </a>
+        </nav>
+        
+        <div class="p-4 border-t border-slate-700/50">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center border border-slate-600">
+                    <i data-lucide="user" class="w-4 h-4 text-emerald-400"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-white truncate">Analyst Mode</p>
+                    <p class="text-xs text-slate-400 truncate">Read-only connection</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <!-- Abstract background decorations -->
+        <div class="absolute top-[-10%] right-[-5%] w-96 h-96 bg-emerald-600/20 rounded-full blur-[100px] pointer-events-none"></div>
+        <div class="absolute bottom-[-10%] left-[20%] w-80 h-80 bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+        
+        <!-- Header (Mobile) -->
+        <header class="md:hidden h-16 glass-card border-b border-slate-700/50 flex items-center justify-between px-4 z-20">
+            <div class="flex items-center">
+                <i data-lucide="trending-up" class="text-emerald-500 mr-2 h-5 w-5"></i>
+                <span class="font-bold">Wealth<span class="text-emerald-500">Dash</span></span>
+            </div>
+            <button class="p-2 rounded-md hover:bg-slate-800 transition-colors">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+        </header>
+
+        <div class="flex-1 overflow-y-auto px-6 py-8 md:px-10 z-10 custom-scrollbar">
+            <div class="max-w-4xl mx-auto space-y-8">
+                
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight text-white mb-2">SEC Ticker Lookup</h1>
+                    <p class="text-slate-400">Fetch recent 10-K, 10-Q, and 8-K filings directly from the EDGAR database.</p>
+                </div>
+
+                <!-- Search Card -->
+                <div class="glass-card rounded-2xl p-6 sm:p-8 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
+                    
+                    <div class="relative z-10">
+                        <label for="ticker-input" class="block text-sm font-medium text-slate-300 mb-2">Search Companies</label>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <div class="relative flex-1 group">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <i data-lucide="building-2" class="h-5 w-5 text-slate-500 group-focus-within:text-emerald-500 transition-colors duration-300"></i>
+                                </div>
+                                <input type="text" id="ticker-input" placeholder="Enter Ticker (e.g. AAPL, MSFT)" 
+                                    class="w-full pl-12 pr-4 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all duration-300 shadow-inner uppercase tracking-wider font-semibold"
+                                    onkeypress="handleEnter(event)">
+                                <!-- Glow effect container behind input -->
+                                <div class="absolute inset-0 -z-10 rounded-xl bg-emerald-500/0 group-focus-within:bg-emerald-500/20 blur-md transition-all duration-500"></div>
+                            </div>
+                            
+                            <button onclick="fetchFilings()" id="search-btn" class="flex-shrink-0 flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] active:transform active:scale-95 group relative overflow-hidden">
+                                <span class="relative z-10">Search EDGAR</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform"></i>
+                                <!-- Button shine effect -->
+                                <div class="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-0"></div>
+                            </button>
+                        </div>
+                        <div id="sec-error" class="text-rose-400 text-sm mt-3 hidden flex items-center gap-1.5 font-medium bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20">
+                            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                            <span id="sec-error-text">An error occurred.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="sec-loader" class="hidden flex-col items-center justify-center py-16 animation-fade-in glass-card rounded-2xl border-dashed border border-slate-600/50">
+                    <div class="loader w-10 h-10 mb-4"></div>
+                    <p class="text-emerald-400 font-medium tracking-wide animate-pulse">Connecting to SEC EDGAR API...</p>
+                    <p class="text-slate-500 text-sm mt-2">Retrieving company filings</p>
+                </div>
+
+                <!-- Results Section -->
+                <div id="results-container" class="hidden opacity-0 transform translate-y-4 transition-all duration-500 ease-out space-y-4">
+                    <h3 class="text-xl font-semibold flex items-center gap-2 text-white">
+                        <i data-lucide="folder-open" class="text-emerald-500 w-5 h-5"></i>
+                        Recent Filings
+                    </h3>
+                    
+                    <div class="glass-card rounded-2xl overflow-hidden border border-slate-700/50 relative shadow-lg">
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-800/80 border-b border-slate-700/50">
+                                        <th class="py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Type</th>
+                                        <th class="py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Filing Date</th>
+                                        <th class="py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Description</th>
+                                        <th class="py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sec-results" class="divide-y divide-slate-700/50">
+                                    <!-- Rows injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Empty State -->
+                <div id="empty-state" class="flex flex-col items-center justify-center py-16 glass-card rounded-2xl border-dashed border border-slate-700">
+                    <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-4">
+                        <i data-lucide="search-x" class="w-8 h-8 text-slate-500"></i>
+                    </div>
+                    <p class="text-slate-400 font-medium">No results to display</p>
+                    <p class="text-slate-500 text-sm mt-1">Enter a ticker symbol to search</p>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        const API_URL = 'http://localhost:5000/api';
+
+        function handleEnter(event) {
+            if (event.key === 'Enter') {
+                fetchFilings();
+            }
+        }
+
+        function getFormDescription(formType) {
+            if (formType === '10-K') return 'Annual Report';
+            if (formType === '10-Q') return 'Quarterly Report';
+            if (formType === '8-K') return 'Current Report (Material Event)';
+            return 'SEC Filing';
+        }
+
+        async function fetchFilings() {
+            const tickerInput = document.getElementById('ticker-input');
+            const ticker = tickerInput.value.trim().toUpperCase();
+            if (!ticker) return;
+            
+            tickerInput.blur(); // Remove focus for cleaner UI
+
+            const loader = document.getElementById('sec-loader');
+            const resultsContainer = document.getElementById('results-container');
+            const resultsTable = document.getElementById('sec-results');
+            const errorDiv = document.getElementById('sec-error');
+            const errorText = document.getElementById('sec-error-text');
+            const emptyState = document.getElementById('empty-state');
+            const searchBtn = document.getElementById('search-btn');
+
+            // UI Reset
+            emptyState.style.display = 'none';
+            resultsContainer.classList.add('hidden', 'opacity-0', 'translate-y-4');
+            errorDiv.classList.add('hidden');
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+            searchBtn.disabled = true;
+            searchBtn.classList.add('opacity-70', 'cursor-not-allowed');
+
+            try {
+                const response = await fetch(`${API_URL}/sec/filings?ticker=${ticker}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to fetch filings');
+                }
+
+                resultsTable.innerHTML = '';
+
+                if (data.filings.length === 0) {
+                    emptyState.innerHTML = `
+                        <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-4">
+                            <i data-lucide="file-warning" class="w-8 h-8 text-slate-500"></i>
+                        </div>
+                        <p class="text-slate-400 font-medium">No 10-K, 10-Q, or 8-K filings found.</p>
+                    `;
+                    lucide.createIcons(); // Re-render newly injected icon
+                    emptyState.style.display = 'flex';
+                } else {
+                    data.filings.forEach((filing, index) => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'group hover:bg-slate-800/60 transition-colors duration-200 cursor-default';
+                        
+                        // Badge logic
+                        let badgeClass = 'bg-slate-700 text-slate-300';
+                        let iconName = 'file';
+                        if (filing.form === '10-K') {
+                            badgeClass = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                            iconName = 'calendar-check-2';
+                        }
+                        if (filing.form === '10-Q') {
+                            badgeClass = 'bg-blue-500/20 text-blue-400 border border-blue-500/30';
+                            iconName = 'calendar-days';
+                        }
+                        if (filing.form === '8-K') {
+                            badgeClass = 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
+                            iconName = 'zap';
+                        }
+                        
+                        tr.innerHTML = `
+                            <td class="py-4 px-6 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold tracking-wide ${badgeClass}">
+                                    ${filing.form}
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 whitespace-nowrap text-slate-400">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="${iconName}" class="w-4 h-4 text-slate-500"></i>
+                                    ${filing.date}
+                                </div>
+                            </td>
+                            <td class="py-4 px-6 text-slate-300 text-sm font-medium">
+                                ${getFormDescription(filing.form)}
+                            </td>
+                            <td class="py-4 px-6 whitespace-nowrap text-right">
+                                <a href="${filing.url}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 text-white hover:bg-slate-700 hover:text-emerald-400 transition-all border border-slate-600 hover:border-emerald-500/50 font-medium text-sm group-hover:shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+                                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                                    View
+                                </a>
+                            </td>
+                        `;
+                        resultsTable.appendChild(tr);
+                    });
+                    
+                    lucide.createIcons(); // Initialize icons in new elements
+                    
+                    // Show results with animation
+                    loader.classList.add('hidden');
+                    loader.classList.remove('flex');
+                    resultsContainer.classList.remove('hidden');
+                    
+                    // Trigger reflow for animation
+                    void resultsContainer.offsetWidth;
+                    
+                    resultsContainer.classList.remove('opacity-0', 'translate-y-4');
+                }
+            } catch (error) {
+                errorText.textContent = error.message;
+                errorDiv.classList.remove('hidden');
+                emptyState.style.display = 'none';
+            } finally {
+                loader.classList.add('hidden');
+                loader.classList.remove('flex');
+                searchBtn.disabled = false;
+                searchBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+            }
+        }
+    </script>
+</body>
+</html>
