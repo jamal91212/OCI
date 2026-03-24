@@ -260,13 +260,6 @@
             searchBtn.classList.add('opacity-70', 'cursor-not-allowed');
 
             try {
-<<<<<<< HEAD
-                const response = await fetch(`${API_URL}/sec/filings?ticker=${ticker}`);
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Failed to fetch filings');
-=======
                 const PROXY_URL = 'https://throbbing-bread-b32d.ashtoncoffman07.workers.dev/';
                 
                 // Fetch CIK using proxy
@@ -309,16 +302,11 @@
                         });
                         if (filings.length >= 15) break; 
                     }
->>>>>>> 6f4edf1 (Initial commit with SEC proxy update)
                 }
 
                 resultsTable.innerHTML = '';
 
-<<<<<<< HEAD
-                if (data.filings.length === 0) {
-=======
                 if (filings.length === 0) {
->>>>>>> 6f4edf1 (Initial commit with SEC proxy update)
                     emptyState.innerHTML = `
                         <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-4">
                             <i data-lucide="file-warning" class="w-8 h-8 text-slate-500"></i>
@@ -328,11 +316,7 @@
                     lucide.createIcons(); // Re-render newly injected icon
                     emptyState.style.display = 'flex';
                 } else {
-<<<<<<< HEAD
-                    data.filings.forEach((filing, index) => {
-=======
                     filings.forEach((filing, index) => {
->>>>>>> 6f4edf1 (Initial commit with SEC proxy update)
                         const tr = document.createElement('tr');
                         tr.className = 'group hover:bg-slate-800/60 transition-colors duration-200 cursor-default';
                         

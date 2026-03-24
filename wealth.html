@@ -220,8 +220,6 @@
 </div>
 
 <script>
-    const API_URL = 'http://localhost:5000/api';
-
     function handleEnter(event) {
         if (event.key === 'Enter') {
             fetchFilings();
@@ -241,16 +239,6 @@
         errorDiv.style.display = 'none';
 
         try {
-<<<<<<< HEAD
-            const response = await fetch(`${API_URL}/sec/filings?ticker=${ticker}`);
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to fetch filings');
-            }
-
-            if (data.filings.length === 0) {
-=======
             const PROXY_URL = 'https://throbbing-bread-b32d.ashtoncoffman07.workers.dev/';
             
             // Fetch CIK using proxy
@@ -296,16 +284,11 @@
             }
 
             if (filings.length === 0) {
->>>>>>> 6f4edf1 (Initial commit with SEC proxy update)
                 results.innerHTML = '<p style="color:var(--text-muted)">No recent 10-K, 10-Q, or 8-K filings found.</p>';
                 return;
             }
 
-<<<<<<< HEAD
-            data.filings.forEach(filing => {
-=======
             filings.forEach(filing => {
->>>>>>> 6f4edf1 (Initial commit with SEC proxy update)
                 const item = document.createElement('div');
                 item.className = 'filing-item';
                 item.innerHTML = `
