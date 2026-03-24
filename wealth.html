@@ -241,6 +241,7 @@
         errorDiv.style.display = 'none';
 
         try {
+<<<<<<< HEAD
             const response = await fetch(`${API_URL}/sec/filings?ticker=${ticker}`);
             const data = await response.json();
 
@@ -249,11 +250,62 @@
             }
 
             if (data.filings.length === 0) {
+=======
+            const PROXY_URL = 'https://throbbing-bread-b32d.ashtoncoffman07.workers.dev/';
+            
+            // Fetch CIK using proxy
+            const tickersResponse = await fetch(`${PROXY_URL}?url=https://www.sec.gov/files/company_tickers.json`);
+            if (!tickersResponse.ok) throw new Error('Failed to fetch company tickers');
+            const tickersData = await tickersResponse.json();
+            
+            let cik = null;
+            for (const key in tickersData) {
+                if (tickersData[key].ticker === ticker) {
+                    cik = String(tickersData[key].cik_str).padStart(10, '0');
+                    break;
+                }
+            }
+            
+            if (!cik) throw new Error(`Invalid ticker: ${ticker}`);
+            
+            // Fetch SEC filings using proxy
+            const submissionsResponse = await fetch(`${PROXY_URL}?url=https://data.sec.gov/submissions/CIK${cik}.json`);
+            if (!submissionsResponse.ok) throw new Error('Failed to fetch SEC filings');
+            const data = await submissionsResponse.json();
+            
+            const recent = data.filings?.recent;
+            if (!recent) throw new Error('No recent filings found.');
+            
+            const forms = recent.form || [];
+            const dates = recent.filingDate || [];
+            const accessions = recent.accessionNumber || [];
+            const primaryDocs = recent.primaryDocument || [];
+            
+            const filings = [];
+            for (let i = 0; i < forms.length; i++) {
+                if (['10-K', '10-Q', '8-K'].includes(forms[i])) {
+                    const accNoDash = accessions[i].replace(/-/g, '');
+                    const docUrl = `https://www.sec.gov/Archives/edgar/data/${parseInt(cik, 10)}/${accNoDash}/${primaryDocs[i]}`;
+                    filings.push({
+                        form: forms[i],
+                        date: dates[i],
+                        url: docUrl
+                    });
+                    if (filings.length >= 15) break; 
+                }
+            }
+
+            if (filings.length === 0) {
+>>>>>>> 6f4edf1 (Initial commit with SEC proxy update)
                 results.innerHTML = '<p style="color:var(--text-muted)">No recent 10-K, 10-Q, or 8-K filings found.</p>';
                 return;
             }
 
+<<<<<<< HEAD
             data.filings.forEach(filing => {
+=======
+            filings.forEach(filing => {
+>>>>>>> 6f4edf1 (Initial commit with SEC proxy update)
                 const item = document.createElement('div');
                 item.className = 'filing-item';
                 item.innerHTML = `
